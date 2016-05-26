@@ -1,6 +1,6 @@
 
 angular.module('starter.anc', [])
-  .controller('AncCtrl', function ($scope, $ionicLoading, AncService) {
+  .controller('AncCtrl', function ($scope, $rootScope, $ionicLoading, AncService) {
 
     $scope.anc = [];
     $scope.query = {};
@@ -8,11 +8,13 @@ angular.module('starter.anc', [])
     $scope.getList = function () {
       $scope.anc = [];
 
+      var url = $rootScope.serverUrl + '/anc/list';
+
       $ionicLoading.show({
         template: '<ion-spinner icon="android"></ion-spinner> Loading...'
       });
 
-      AncService.getList()
+      AncService.getList(url)
         .then(function (rows) {
           $scope.anc = rows;
           $ionicLoading.hide();
@@ -36,11 +38,13 @@ angular.module('starter.anc', [])
       if ($scope.query.name) {
         $scope.anc = [];
 
+        var url = $rootScope.serverUrl + '/anc/search';
+
         $ionicLoading.show({
           template: '<ion-spinner icon="android"></ion-spinner> Loading...'
         });
 
-        AncService.search($scope.query.name)
+        AncService.search(url, $scope.query.name)
           .then(function (rows) {
             $scope.anc = rows;
             $ionicLoading.hide();
@@ -58,14 +62,14 @@ angular.module('starter.anc', [])
   })
   .factory('AncService', function ($q, $http) {
 
-    var url = 'http://192.168.43.76:3000';
+    // var url = 'http://192.168.43.76:3000';
 
     return {
-      getList: function () {
+      getList: function (url) {
         var q = $q.defer();
-        var _url = url + '/anc/list';
+        // var _url = url + '/anc/list';
 
-        $http.get(_url, {})
+        $http.get(url, {})
           .success(function (data) {
             if (data.ok) { // true
               q.resolve(data.rows);
@@ -80,11 +84,11 @@ angular.module('starter.anc', [])
         return q.promise;
       },
 
-      search: function (_name) {
+      search: function (url, _name) {
         var q = $q.defer();
-        var _url = url + '/anc/search';
+        // var _url = url + '/anc/search';
 
-        $http.post(_url, {name: _name})
+        $http.post(url, {name: _name})
           .success(function (data) {
             if (data.ok) { // true
               q.resolve(data.rows);

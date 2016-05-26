@@ -5,7 +5,10 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'starter.anc'])
 
-  .run(function ($ionicPlatform) {
+  .run(function ($ionicPlatform, $rootScope) {
+
+    $rootScope.serverUrl = 'http://192.168.43.76:3000';
+
     $ionicPlatform.ready(function () {
       if (window.cordova && window.cordova.plugins.Keyboard) {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -22,17 +25,19 @@ angular.module('starter', ['ionic', 'starter.anc'])
       }
     });
   })
-  .controller('MainCtrl', function ($scope, $ionicLoading, HomeService, PersonService) {
+  .controller('MainCtrl', function ($scope, $rootScope, $ionicLoading, HomeService, PersonService) {
     $scope.person = [];
     $scope.home = [];
 
     $scope.getPerson = function () {
 
+      var url = $rootScope.serverUrl + '/person';
+
       $ionicLoading.show({
         template: '<ion-spinner icon="android"></ion-spinner> Loading...'
       });
 
-      PersonService.getList()
+      PersonService.getList(url)
         .then(function (rows) {
 
           rows.forEach(function (v) {
@@ -56,11 +61,13 @@ angular.module('starter', ['ionic', 'starter.anc'])
 
     $scope.getHome = function () {
 
+      var url = $rootScope.serverUrl + '/home';
+
       $ionicLoading.show({
         template: '<ion-spinner icon="android"></ion-spinner> Loading...'
       });
 
-      HomeService.getList()
+      HomeService.getList(url)
         .then(function (rows) {
 
           rows.forEach(function (v) {
@@ -93,13 +100,13 @@ angular.module('starter', ['ionic', 'starter.anc'])
   })
   .factory('PersonService', function ($q, $http) {
 
-    var url = 'http://192.168.43.76:3000';
+    // var url = 'http://192.168.43.76:3000';
 
     return {
-      getList: function () {
+      getList: function (url) {
         var q = $q.defer();
-        var _url = url + '/person';
-        $http.get(_url, {})
+        // var _url = url + '/person';
+        $http.get(url, {})
           .success(function (data) {
             if (data.ok) { // true
               q.resolve(data.rows);
@@ -118,13 +125,13 @@ angular.module('starter', ['ionic', 'starter.anc'])
   })
   .factory('HomeService', function ($q, $http) {
 
-    var url = 'http://192.168.43.76:3000';
+    // var url = 'http://192.168.43.76:3000';
 
     return {
-      getList: function () {
+      getList: function (url) {
         var q = $q.defer();
-        var _url = url + '/home';
-        $http.get(_url, {})
+        // var _url = url + '/home';
+        $http.get(url, {})
           .success(function (data) {
             if (data.ok) { // true
               q.resolve(data.rows);
