@@ -22,8 +22,9 @@ angular.module('starter', ['ionic'])
       }
     });
   })
-  .controller('MainCtrl', function ($scope, $ionicLoading, PersonService) {
+  .controller('MainCtrl', function ($scope, $ionicLoading, HomeService, PersonService) {
     $scope.person = [];
+    $scope.home = [];
 
     $scope.getPerson = function () {
 
@@ -53,22 +54,76 @@ angular.module('starter', ['ionic'])
         });
     };
 
+    $scope.getHome = function () {
 
-    $scope.doRefresh = function () {
-      $scope.getPerson();
+      $ionicLoading.show({
+        template: '<ion-spinner icon="android"></ion-spinner> Loading...'
+      });
+
+      HomeService.getList()
+        .then(function (rows) {
+
+          rows.forEach(function (v) {
+            var obj = {};
+            obj.HOSPCODE = v.HOSPCODE;
+            obj.HOUSE = v.HOUSE;
+            obj.VILLAGE = v.VILLAGE;
+
+            $scope.home.push(obj);
+          });
+
+          $ionicLoading.hide();
+          $scope.$broadcast('scroll.refreshComplete');
+
+        }, function (err) {
+          $ionicLoading.hide();
+          alert('Error: ' + JSON.stringify(err));
+        });
     };
 
-    $scope.getPerson();
+
+    $scope.doRefresh = function () {
+      //$scope.getPerson();
+      $scope.getHome();
+    };
+
+    //$scope.getPerson();
+    $scope.getHome();
 
   })
   .factory('PersonService', function ($q, $http) {
 
-    var url = 'http://172.16.0.218:3000';
+    var url = 'http://192.168.43.76:3000';
 
     return {
       getList: function () {
         var q = $q.defer();
         var _url = url + '/person';
+        $http.get(_url, {})
+          .success(function (data) {
+            if (data.ok) { // true
+              q.resolve(data.rows);
+            } else { // false
+              q.reject(data.msg);
+            }
+          })
+          .error(function () {
+            q.reject('Connection failed')
+          });
+
+        return q.promise;
+      }
+    }
+
+  })
+  .factory('HomeService', function ($q, $http) {
+
+    var url = 'http://192.168.43.76:3000';
+
+    return {
+      getList: function () {
+        var q = $q.defer();
+        var _url = url + '/home';
         $http.get(_url, {})
           .success(function (data) {
             if (data.ok) { // true
