@@ -1,27 +1,53 @@
 
 angular.module('starter.anc', [])
-  .controller('AncCtrl', function ($scope, AncService) {
+  .controller('AncCtrl', function ($scope, $ionicLoading, AncService) {
 
     $scope.anc = [];
     $scope.query = {};
 
     $scope.getList = function () {
+      $scope.anc = [];
+
+      $ionicLoading.show({
+        template: '<ion-spinner icon="android"></ion-spinner> Loading...'
+      });
+
       AncService.getList()
         .then(function (rows) {
           $scope.anc = rows;
+          $ionicLoading.hide();
+          $scope.$broadcast('scroll.refreshComplete');
         }, function (err) {
+          $ionicLoading.hide();
+          $scope.$broadcast('scroll.refreshComplete');
           alert(JSON.stringify(err));
         });
     };
+
+    $scope.doRefresh = function () {
+      if ($scope.query.name) {
+        $scope.search();
+      } else {
+        $scope.getList();
+      }
+     };
 
     $scope.search = function () {
       if ($scope.query.name) {
         $scope.anc = [];
 
+        $ionicLoading.show({
+          template: '<ion-spinner icon="android"></ion-spinner> Loading...'
+        });
+
         AncService.search($scope.query.name)
           .then(function (rows) {
             $scope.anc = rows;
+            $ionicLoading.hide();
+            $scope.$broadcast('scroll.refreshComplete');
           }, function (err) {
+            $ionicLoading.hide();
+            $scope.$broadcast('scroll.refreshComplete');
             alert(JSON.stringify(err));
           });
       }
