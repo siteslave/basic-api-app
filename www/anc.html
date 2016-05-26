@@ -47,7 +47,7 @@
             </button>
           </div>
 
-          <a ng-repeat="a in anc" class="item item-icon-left" href="#">
+          <a ng-repeat="a in anc" class="item item-icon-left" ng-click="showHistory(a.CID)">
             <i class="icon ion-email"></i>
             {{ a.NAME }} {{ a.LNAME }}
             <span class="item-note">
@@ -58,5 +58,25 @@
         </div>
       </ion-content>
     </ion-pane>
+
+    <script id="templates/modal.html" type="text/ng-template">
+      <ion-modal-view>
+        <ion-header-bar class="bar bar-header bar-assertive">
+          <h1 class="title">ประวัติการฝากครรภ์</h1>
+          <button class="button button-clear button-primary" ng-click="modal.hide()">Cancel</button>
+        </ion-header-bar>
+        <ion-content class="padding">
+          <div class="list">
+            <div class="item" ng-repeat="h in history">
+              {{ h.HOSPCODE }} - อายุครรภ์ {{ h.GA }}
+              <span class="item-note">
+                {{ h.DATE_SERV }}
+              </span>
+            </div>
+          </div>
+        </ion-content>
+      </ion-modal-view>
+    </script>
+
   </body>
 </html>

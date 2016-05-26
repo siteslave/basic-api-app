@@ -1,9 +1,37 @@
 
 angular.module('starter.anc', [])
-  .controller('AncCtrl', function ($scope, $rootScope, $ionicLoading, AncService) {
+  .controller('AncCtrl', function ($scope, $rootScope, $ionicModal,
+    $ionicLoading, $ionicPopup, AncService) {
 
     $scope.anc = [];
     $scope.query = {};
+
+
+    $ionicModal.fromTemplateUrl('templates/modal.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function (modal) {
+      $scope.modal = modal;
+      });
+
+    $scope.showHistory = function (cid) {
+
+      var url = $rootScope.serverUrl + '/anc/history';
+
+      AncService.history(url, cid)
+        .then(function (rows) {
+          $scope.history = rows;
+          $scope.modal.show();
+        }, function (err) {
+          $ionicPopup.alert({
+            title: 'ไม่พบข้อมูล',
+            template: 'ไม่พบประวัติการฝากครรภ์ในฐานข้อมูล'
+          });
+        });
+
+
+    };
+
 
     $scope.getList = function () {
       $scope.anc = [];
@@ -65,6 +93,24 @@ angular.module('starter.anc', [])
     // var url = 'http://192.168.43.76:3000';
 
     return {
+      history: function (url, cid) {
+        var q = $q.defer();
+        // var _url = url + '/anc/search';
+
+        $http.post(url, {cid: cid})
+          .success(function (data) {
+            if (data.ok) { // true
+              q.resolve(data.rows);
+            } else { // false
+              q.reject(data.msg);
+            }
+          })
+          .error(function () {
+            q.reject('Connection failed')
+          });
+
+        return q.promise;
+      },
       getList: function (url) {
         var q = $q.defer();
         // var _url = url + '/anc/list';
