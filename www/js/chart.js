@@ -1,5 +1,7 @@
 angular.module('starter.chart', ["highcharts-ng"])
-  .controller('ChartCtrl', function ($scope, $rootScope, ChartService) {
+  .controller('ChartCtrl', function ($scope, $rootScope, $ionicLoading, ChartService) {
+
+    $scope.query = {};
 
     var url = $rootScope.serverUrl + '/chart';
 
@@ -30,41 +32,49 @@ angular.module('starter.chart', ["highcharts-ng"])
           useHighStocks: false
     };
 
-      ChartService.getChart(url)
-        .then(function (res) {
+      var currentDate = moment().format('YYYY-MM-DD');
 
-            /*
-            date: "2016-05-26",
-            region: "07",
-            provcode: "40",
-            changwatname: "ขอนแก่น",
-            hcode: "11000",
-            hname: "โรงพยาบาลน้ำพอง",
-            cases: "14",
-            opd: "14",
-            ipd: "0",
-            inprov: "14",
-            inregion: "14"
-            */
-          res.forEach(function (v) {
-            $scope.chartConfig.xAxis.categories.push(v.hname);
-            $scope.chartConfig.series[0].data.push(parseInt(v.cases));
-          });
-
-        }, function (err) {
-          alert(err);
+      $scope.getChartData = function (date) {
+        $ionicLoading.show({
+          template: '<ion-spinner icon="android"></ion-spinner> Loading...'
         });
+
+
+        ChartService.getChart(date)
+          .then(function (res) {
+            res.forEach(function (v) {
+              $scope.chartConfig.xAxis.categories.push(v.hname);
+              $scope.chartConfig.series[0].data.push(parseInt(v.cases));
+            });
+            $ionicLoading.hide();
+          }, function (err) {
+            $ionicLoading.hide();
+            alert(err);
+          });
+      };
+
+      // initial chart
+    $scope.getChartData(currentDate);
+
+    $scope.getChart = function () {
+
+      var date = moment($scope.query.date).format('YYYY-MM-DD');
+      console.log(date);
+
+      $scope.getChartData(date);
+
+    };
 
   })
   .factory('ChartService', function ($q, $http) {
 
       return {
-          getChart: function (url) {
+          getChart: function (date) {
             var q = $q.defer();
-            //var url = 'http://localhost:3000/chart';
-            $http.get(url, {})
+            var _url = 'http://nrefer.healtharea.net/refer/report/sum_hcode?date='+date+'&ws=true';
+            $http.get(_url, {})
               .success(function (data) {
-                q.resolve(data.data.data);
+                q.resolve(data.data);
               })
               .error(function () {
                 q.reject('Connection failed')
